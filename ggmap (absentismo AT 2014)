@@ -1,0 +1,300 @@
+# =================================================================================
+#                                 MAPA con ggmap
+# =================================================================================
+
+# ABSENTIsMO POR AT 2014
+# Datos S.S.
+
+
+# Descrición y objetivos
+# =================================================================================
+
+# Representar sobre un mapa los indicadores de absentismo por accidente de trabajo
+# en el año 2014, a partir de los datos publicados en la página de estadísticas de 
+# la seguridad Social.
+
+# Toda la preparación previa de los datos se ha realizado en Ecxel
+# El objetivo fundamental es explorar las capacidades gráficas espaciales de R
+
+# Etapas, funciones utilizadas y objetos creados
+#   1. Cargar datos con los indicadores por provincia   -> AT_2014 (read.csv)
+#   2. Obtener las coordenadas de cada provincia        -> alba, alic... (geocode)
+#   3. Unir las coordenadas en un solo df               -> df_coordenadas (rbind)
+#   4. Juntar todos los datos                           -> Todo_2014 (cbind)
+#   5. Obtener un mapa de españa                        -> mapa_españa (get_Map)
+#   6. Añadirle nuestros puntos                         -> get_map + geom_point
+
+
+
+# 0. Cargar librerias y configurar wd
+# =================================================================================
+
+library(ggmap)
+library(RColorBrewer)
+
+setwd("U:/COMPARTIDOS/C-SMA-MC_IT_CONSULTORIA/Análisis siniestralidad 2014/Datos/Datos oficiales")
+
+
+
+# 1. Cargar datos con los indicadores por provincia
+# =================================================================================
+
+AT_2014<-read.csv("datos_2014.csv", header = TRUE, sep = ";")
+
+# Para ver los datos
+
+head(AT_2014)
+##     n  cod provincia     INC         ABS
+##   1 1 alme   Almería 0.03996 0.003881047
+##   2 2 cadi     Cádiz 0.04380 0.004124400
+##   etc
+
+names(AT_2014)
+## [1] "n"         "cod"       "provincia" "INC"       "ABS" str(AT_2014)
+
+str(AT_2014)
+## 'data.frame':  52 obs. of  5 variables:
+## $ n        : int  1 2 3 4 5 6 7 8 10 11 ...
+## $ cod      : Factor w/ 52 levels "alba","alic",..: 3 13 18 23 25 27 34 43 ...
+## $ provincia: Factor w/ 52 levels "Albacete","Alicante/Alacant",..: 3 13 18 ...
+## $ INC      : num  0.04 0.0438 0.0446 0.0347 0.0491 ...
+## $ ABS      : num  0.00388 0.00412 0.00367 0.0034 0.00416 ...
+
+# Notas:
+# Se ha incluido un número de fila para garantizar que las fusiones posteriores
+# de las tablas, no se hacen de manera desordenada.
+
+
+# Convertir la Incidencia y el Absentismo en valores porcentuales, para facilitar la  lectura
+
+AT_2014$INC <-AT_2014$INC*100
+AT_2014$ABS <-AT_2014$ABS*100
+
+
+# Comprobación:
+
+head(AT_2014)
+##   n  cod provincia   INC       ABS
+## 1 1 alme   Almería 3.996 0.3881047
+
+
+
+# 2. Obtener las coordenadas de cada provincia (ha sido preparado en Excel)
+# =================================================================================
+
+# El numero tras la # se ha incluido en la cadena original, para poder comprobar
+# posteriormente la integridad y orden de las filas
+
+alme<-geocode("almeria, spain")    #1
+cadi<-geocode("cadiz, spain")    #2
+cord<-geocode("cordoba, spain")    #3
+gran<-geocode("granada, spain")    #4
+huel<-geocode("huelva, spain")    #5
+jaen<-geocode("jaen, spain")    #6
+mala<-geocode("malaga, spain")    #7
+sevi<-geocode("sevilla, spain")    #8
+hues<-geocode("huesca, spain")    #9
+teru<-geocode("teruel, spain")    #10
+zara<-geocode("zaragoza, spain")    #11
+astu<-geocode("asturias, spain")    #12
+bale<-geocode("Palma de mallorca, spain")    #13
+lasp<-geocode("Las palmas de gran canaria, spain")    #14
+tene<-geocode("Santa Cruz de tenerife, spain")    #15
+cant<-geocode("santander, spain")    #16
+avil<-geocode("avila, spain")    #17
+burg<-geocode("burgos, spain")    #18
+leon<-geocode("leon, spain")    #19
+pale<-geocode("palencia, spain")    #20
+sala<-geocode("salamanca, spain")    #21
+sego<-geocode("segovia, spain")    #22
+sori<-geocode("soria, spain")    #23
+vall<-geocode("valladolid, spain")    #24
+zamo<-geocode("zamora, spain")    #25
+alba<-geocode("albacete, spain")    #26
+ciud<-geocode("ciudad real, spain")    #27
+cuen<-geocode("cuenca, spain")    #28
+guad<-geocode("guadalajara, spain")    #29
+tole<-geocode("toledo, spain")    #30
+barc<-geocode("barcelona, spain")    #31
+giro<-geocode("girona, spain")    #32
+llei<-geocode("lleida, spain")    #33
+tarr<-geocode("tarragona, spain")    #34
+bada<-geocode("badajoz, spain")    #35
+cace<-geocode("caceres, spain")    #36
+coru<-geocode("coruna, spain")    #37
+lugo<-geocode("lugo, spain")    #38
+oure<-geocode("ourense, spain")    #39
+pont<-geocode("pontevedra, spain")    #40
+madr<-geocode("madrid, spain")    #41
+murc<-geocode("murcia, spain")    #42
+nava<-geocode("Pamplona, spain")    #43
+la_r<-geocode("La Rioja, spain")    #44
+alic<-geocode("alicante, spain")    #45
+cast<-geocode("castellon, spain")    #46
+vale<-geocode("valencia, spain")    #47
+arab<-geocode("Vitoria, spain")    #48
+bizk<-geocode("Bilbao, spain")    #49
+gipu<-geocode("Donostia, spain")    #50
+ceut<-geocode("ceuta, spain")    #51
+meli<-geocode("melilla, spain")    #52
+
+
+
+# 3. Unir las coordenadas en un solo df
+# =================================================================================
+
+df_coordenadas <- rbind(alme, cadi, cord, gran, huel, jaen, mala, sevi, hues, teru, +
+                        zara, astu, bale, lasp, tene, cant, avil, burg, leon, pale, +
+                        sala, sego, sori, vall, zamo, alba, ciud, cuen, guad, tole, +
+                        barc, giro, llei, tarr, bada, cace, coru, lugo, oure, pont, +
+                        madr, murc, nava, la_r, alic, cast, vale, arab, bizk, gipu, +
+                        ceut, meli)
+
+# Esta operación (preparar el contenido entre paréntesis) se ha hecho de forma manual,
+# a partir de la columna "cod" del archivo excel original.
+
+
+class(df_coordenadas)
+## [1] "data.frame"
+
+
+
+# ------------------------------ IMPORTANTE ---------------------------------------
+# Los pasos 2 y 3, y también el 4, pueden simplificarse según se explica en:
+# http://stackoverflow.com/questions/22209898/ggmap-visualization-of-data-with-circles-on-map
+
+
+
+# 4. Juntar todos los datos
+# =================================================================================
+
+Todo_2014<- cbind(AT_2014, df_coordenadas)
+
+# Comprobaciones, si son necesarias:
+
+head(Todo_2014)
+names(Todo_2014)
+str(Todo_2014)
+summary(Todo_2014)
+
+
+
+# 5. Obtener un mapa de españa
+# =================================================================================
+
+mapa_españa<-get_map("spain", zoom=6, source="google", maptype="terrain")
+ggmap(mapa_españa) # para verlo
+
+
+# Definir origen del mapa: source= "stamen", "google", "osm"
+# Opciones maptype para google: "satellite", "terrain", "roadmap", "hybrid"
+# Más información en:
+# https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/ggmap/ggmapCheatsheet.pdf
+
+
+
+# 6. Añadirle nuestros puntos
+# =================================================================================
+
+
+# Prueba 1: solo muestra la posición de las provincias
+# ---------------------------------------------------------------------------------
+
+ggmap(mapa_españa)+
+     geom_point(data=Todo_2014, size=10 , aes(x=lon, y=lat, colour="red"))
+ 
+# El "+" siempre antes del salto de línea
+
+# Hay un mensaje: "Removed 2 rows containing missing values (geom_point)"
+# Significa que hay dos puntos (los de canarias) que están fuera del mapa.
+
+
+# Pprueba 2: El tamaño del punto es proporcional a la tasa de absentismo
+# ---------------------------------------------------------------------------------
+
+ggmap(mapa_españa)+
+  geom_point(aes(x=lon, y=lat, size=ABS), data=Todo_2014, colour="darkred")+
+  scale_size(range=c(10,40))
+
+# El parámetro "size" hace que el tamaño del punto sea proporcional a la tasa de absentismo.
+# Para que funcione debe estar dentro de los atributos estéticos.
+
+# Por algún motivo, si el atributo "colour" se deja dentro de los atributos estéticos,
+# la instrucción no parece ser reconocida correctamente.
+
+# El rango controla el tamaño de los puntos. Parece que por defecto hay 5 categorías.
+# La escala puede ser ascendente (10:40) o descendente (40:10)
+
+
+
+# Prueba 3: Variando el tamaño y el color del punto
+# ---------------------------------------------------------------------------------
+
+ggmap(mapa_españa)+
+  geom_point(aes(x=lon, y=lat, size=ABS, colour=ABS), data=Todo_2014 )+
+  scale_size(range=c(10,40))+
+  scale_colour_gradientn(colours=c("green", "red"))
+
+# Se añade la instrucción "colour=ABS" para indicar que el color del punto debe de 
+# variar segín la tasa de absentismo.
+
+# con "scale_colour_gradientn" se controla de que color a que color va a ir la escala.
+# El primer color son los valores más bajos y el segundo los más altos.
+
+# Hay más posibilidades de configuración de los colores
+
+
+
+# Prueba 4. Tamaño fijo y color dependiendo del valor de la variable. Títulos
+# ---------------------------------------------------------------------------------
+
+ggmap(mapa_españa)+
+  geom_point(aes(x=lon, y=lat, colour=ABS), data=Todo_2014, size=30)+
+  scale_colour_gradientn(colours=c("green", "red")) +
+  scale_size(range=c(10,40))+
+  labs(title = "Absentismo por accidente de trabajo 2014")+
+  labs(colour = "Tasa de absentismo")+
+  theme(plot.title = element_text(size = rel(3), colour = "darkblue"))+
+  theme(legend.text = element_text(size = rel(2)), legend.title = element_text(size = rel(2)))
+
+
+# Notas:
+# labs(title = "texto")  -> controla el título del mapa
+# labs(colour = "texto") -> controla el título de la leyenda
+# theme(plot.title = element_text(size = rel(3)... -> controla el tamaño del título, color...
+# Dentro de "theme" también se introducen ordenes para el tamaño de los textos de la leyenda
+
+
+
+# Prueba 4. Códigos de las provincias en lugar de puntos
+# ---------------------------------------------------------------------------------
+
+# Se crea también un nuevo mapa base (mapa_españa2), sin rótulos.
+
+mapa_españa2<-get_map("spain", zoom=6, source="stamen", maptype="watercolor")
+ggmap(mapa_españa2)+
+  geom_text(aes(x=lon, y=lat, colour=ABS, label=cod), data=Todo_2014, size=15, fontface="bold") +
+  scale_colour_gradientn(colours=c("green", "red"))
+
+
+
+# ======  NOTAS VARIAS ===================================================================
+
+# Leyenda - # Ver opciones: http://www.cookbook-r.com/Graphs/Legends_(ggplot2)/
+
+# Quitar título a la leyenda: +theme(legend.title=element_blank())
+# Poner título: 
+#   +labs(colour = "Tasa de absentismo")
+#   +scale_colour_continuous("Tasa de absentismo")
+# Depende del tipo de variable (discrete/continuous) y si se ha ligado al color o al 
+# tamaño, hay que elegir la función correspondiente. La instrucción labs(colour=())
+# parece más universal pero puede ser insuficiente en leyendas multiples
+
+# Ver: http://rstudio-pubs-static.s3.amazonaws.com/2795_901030c4ef944c7797f39bcdac099d74.html
+# Ver: http://docs.ggplot2.org/current/theme.html
+# Ver: http://rstudio-pubs-static.s3.amazonaws.com/12805_7a10e31fc560451ebc733fe6019a9c72.html
+
+
+# Tamaño leyenda: +theme(legend.text = element_text(size = rel(2.1)))
+# Tamaño título leyenda: +theme(legend.title = element_text(size = rel(2.1)))
+# Título del mapa: +labs(title = "Absentismo por accidente de trabajo 2014")

@@ -1,0 +1,72 @@
+Tipo;Id_mapa_1;AMBITO GEOGRAFICO;nombre;Etiqueta1;cod;INC;ABS
+A;10;COMUNITAT VALENCIANA;C.Valenciana;c_valenciana;cal;0.03324;0.003500673
+A;11;EXTREMADURA;Extremadura;extremadura;extr;0.039;0.004130795
+A;12;GALICIA;Galicia;galicia;gali;0.03852;0.004812362
+A;13;MADRID;Madrid;madrid;madr;0.03192;0.002628809
+A;14;MURCIA;Murcia;murcia;murc;0.03732;0.003585787
+A;15;NAVARRA;Navarra;navarra;nava;0.03888;0.003473635
+A;16;PAIS VASCO;Pais Vasco;p_vasco;pva;0.04116;0.003682974
+A;17;LA RIOJA;La Rioja;la_rioja;la_r;0.03804;0.003596604
+A;18;CEUTA;Ceuta;ceuta;ceut;0.042;0.004710904
+A;19;MELILLA;Melilla;melilla;meli;0.03996;0.003550419
+A;01;ANDALUCIA;Andalucia;andalucia;anda;0.04236;0.003850698
+A;02;ARAGON;Arag¢n;aragon;arag;0.0342;0.003596153
+A;03;ASTURIAS;P.Asturias;asturias;astu;0.0432;0.00520057
+A;04;ILLES BALEARS;Islas Baleares;baleares;bale;0.05316;0.00446544
+A;05;CANARIAS;Canarias;canarias;cana;0.04284;0.00388729
+A;06;CANTABRIA;Cantabria;cantabria;cant;0.0354;0.004399299
+A;07;CASTILLA Y LEON;Castilla y Le¢n;castilla_leon;cyl;0.03492;0.003689083
+A;08;CASTILLA-LA MANCHA;Castilla - La Mancha;castilla_la_mancha;clm;0.04272;0.004007487
+A;09;CATALU¥A;Catalu¤a;catalu¤a;cata;0.03972;0.003631387
+P;11;CADIZ;C diz;cadiz;cadi;0.0438;0.0041244
+P;12;CASTELLON/CASTELLà;Castell¢n/Castell¢;castellon;cast;0.03156;0.003426638
+P;13;CIUDAD REAL;Ciudad Real;ciudad_real;ciud;0.0408;0.004087825
+P;14;CORDOBA;C¢rdoba;cordoba;cord;0.04464;0.00367271
+P;15;CORU¥A (A);Coru¤a, A;coru¤a;coru;0.03816;0.004762159
+P;16;CUENCA;Cuenca;cuenca;cuen;0.0402;0.004299748
+P;17;GIRONA;Girona;girona;giro;0.0426;0.004067425
+P;18;GRANADA;Granada;granada;gran;0.03468;0.00340149
+P;19;GUADALAJARA;Guadalajara;guadalajara;guad;0.05076;0.004411253
+P;20;GIPUZKOA;Gipuzkoa;gipuzkoa;gipu;0.042;0.003563671
+P;21;HUELVA;Huelva;huelva;huel;0.04908;0.00416037
+P;22;HUESCA;Huesca;huesca;hues;0.03696;0.003734479
+P;23;JAEN;Ja‚n;jaen;jaen;0.03612;0.00349127
+P;24;LEON;Le¢n;leon;leon;0.03756;0.004912642
+P;25;LLEIDA;Lleida;lleida;llei;0.04104;0.003643003
+P;26;RIOJA (LA);Rioja, La;la_rioja;la_r;0.03804;0.003596604
+P;27;LUGO;Lugo;lugo;lugo;0.03264;0.005124033
+P;28;MADRID;Madrid;madrid;madr;0.03192;0.002628809
+P;29;MALAGA;M laga;malaga;mala;0.04236;0.003683579
+P;30;MURCIA;Murcia;murcia;murc;0.03732;0.003585787
+P;31;NAVARRA;Navarra;navarra;nava;0.03888;0.003473635
+P;32;OURENSE;Ourense;ourense;oure;0.03768;0.004580443
+P;33;ASTURIAS;Asturias;asturias;astu;0.0432;0.00520057
+P;34;PALENCIA;Palencia;palencia;pale;0.03348;0.003219584
+P;35;PALMAS (LAS);Palmas, Las;laspalmas;lasp;0.0438;0.00381
+P;36;PONTEVEDRA;Pontevedra;pontevedra;pont;0.0414;0.004845501
+P;37;SALAMANCA;Salamanca;salamanca;sala;0.033;0.004088384
+P;38;SANTA CRUZ DE TENERIFE;Santa Cruz de Tenerife;tenerife;tene;0.04164;0.003965497
+P;39;CANTABRIA (SANTANDER);Cantabria;cantabria;cant;0.0354;0.004399299
+P;40;SEGOVIA;Segovia;segovia;sego;0.0414;0.003350564
+P;41;SEVILLA;Sevilla;sevilla;sevi;0.045;0.004109178
+P;42;SORIA;Soria;soria;sori;0.03924;0.003840145
+P;43;TARRAGONA;Tarragona;tarragona;tarr;0.03876;0.003784675
+P;44;TERUEL;Teruel;teruel;teru;0.0348;0.003812745
+P;45;TOLEDO;Toledo;toledo;tole;0.0462;0.004050411
+P;46;VALENCIA/VALÔNCIA;Valencia/Val‚ncia;valencia;vale;0.03348;0.003527783
+P;47;VALLADOLID;Valladolid;valladolid;vall;0.0294;0.00294886
+P;48;BIZKAIA;Bizkaia;bizkaia;bizk;0.03924;0.003636957
+P;49;ZAMORA;Zamora;zamora;zamo;0.03408;0.003372519
+P;50;ZARAGOZA;Zaragoza;zaragoza;zara;0.03348;0.003534204
+P;51;CEUTA;Ceuta;ceuta;ceut;0.042;0.004710904
+P;52;MELILLA;Melilla;melilla;meli;0.03996;0.003550419
+P;01;ARABA/ALAVA;Araba/µlava;araba;arab;0.04524;0.004038135
+P;02;ALBACETE;Albacete;albacete;alba;0.03588;0.003441531
+P;03;ALICANTE/ALACANT;Alicante/Alacant;alicante;alic;0.03348;0.003484672
+P;04;ALMERIA;Almer¡a;almeria;alme;0.03996;0.003881047
+P;05;AVILA;µvila;avila;avil;0.03;0.002975342
+P;06;BADAJOZ;Badajoz;badajoz;bada;0.04116;0.00423215
+P;07;ILLES BALEARES;Balears, Illes;baleares;bale;0.05316;0.00446544
+P;08;BARCELONA;Barcelona;barcelona;barc;0.03936;0.00355534
+P;09;BURGOS;Burgos;burgos;burg;0.04044;0.003779201
+P;10;CACERES;C ceres;caceres;cace;0.03528;0.003955226

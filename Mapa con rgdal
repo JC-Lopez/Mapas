@@ -1,0 +1,159 @@
+## EN ELABORACION
+
+
+# ========================================================
+# Mapa a partir del SHP Provincias_ETRS89_30N
+# ========================================================
+
+# Fuente mapa: http://www.arcgis.com/home/item.html?id=83d81d9336c745fd839465beab885ab7
+# Ver https://github.com/dppascual/Data_Preparation_in_R/blob/master/ClassS4_maps/mapas.Rmd
+
+
+setwd("C:/workdir/mapas_rgdal")
+
+# Carga de librerias necesarias
+library(rgdal)
+library(ggplot2)
+library(rgeos)      # sin cargar
+library(maptools)   # sin cargar
+library(ggmap)
+library(sp)
+library(rgal)       # sin cargar
+library(RColorBrewer)
+
+# mapa fuente: Provincias_ETRS89_30N
+
+
+
+# -----------------------------------------------------
+# Lectura del mapa
+# -----------------------------------------------------
+
+# Extraer todos los ficheros del zip "Provincias_ETRS89_30N.zip"
+
+mapa<-readOGR(dsn="C:/workdir/mapas_rgdal", "Provincias_ETRS89_30N")
+
+# Examinar los objetos
+
+ogrInfo(".", "Provincias_ETRS89_30N")
+# "." es una forma abrebiada de indicar el wd
+
+## OGR data source with driver: ESRI Shapefile 
+## Source: "C:/workdir/mapas_rgdal", layer: "Provincias_ETRS89_30N"
+## with 52 features and 5 fields
+## Feature type: wkbPolygon with 2 dimensions
+
+
+class(mapa)
+## [1] "SpatialPolygonsDataFrame"
+## attr(,"package")
+## [1] "sp"
+
+names(mapa)
+# Muestra los nombres de las columnas del objeto
+## [1] "Codigo"    "Texto"     "Texto_Alt" "Cod_CCAA"  "CCAA" 
+
+head(mapa@data, n=2)
+# Muestra 2 registros de las 5 columnas. 
+##    Codigo    Texto Texto_Alt Cod_CCAA                 CCAA
+##  0     01   ÃÂlava     Araba       16            PaÃ­s Vasco
+##  1     02 Albacete  Albacete      08   Castilla - La Mancha
+
+# va a haber problemas con la codificaciÃ³n del texto
+# el nombre mÃ¡s correcto estÃ¡ en la columna "Texto_Alt"
+# "Codigo" tiene un id para cada provincia
+
+slotNames(mapa)
+## [1] "data" "polygons" "plotOrder" "bbox" "proj4string"
+
+# se puede extraer la informaciÃ³n de cada slot con, por ejemplo
+mapaData <- mapa@data  (genera una tabla con los valores de las 5 columnas)
+
+# Se graba en un fichero, para facilitar su encaje con el resto de datos
+write.table(mapaData, file = "datosmapa.csv", sep = ";", col.names = NA, qmethod = "double")
+
+summary(mapa)
+# Hay informaciÃ³n sobre las coordenadas max. y min. y el sistema de proyecciÃ³n
+  
+plot(mapa)
+# Vemos el mapa
+
+
+# -----------------------------------------------------
+# Carga datos AT 2014
+# -----------------------------------------------------
+
+Datos_AT_2014 <- read.delim("C:/workdir/mapas_rgdal/Datos_AT_2014.txt", header=F)
+
+# El fichero ha sido descargado de la web de la Seg. Social y preparado a mano
+#   - Se han reescrito los nombres de las provincias
+#   - Añadido un campo ID coincidente con el del mapa
+#   - calculado la incidencia anual y la tasa de absentismo
+#   - ATENCION: contiene datos tanto de las provincias como de las CCAA:
+#              - Tipo A: CCAA
+#              - Tipo P: Provincias
+#   - Lo del encoding....
+#   - Se ha importado usando la opción del menú, con la opción "encabezados" desactivada
+#   - Es la única manera de que mantenga el formato 01 y no lo pase como 1, etc
+
+# Hay que 
+#  1. Eliminar la actual fila de nombres
+#  2. Añadir la fila con los nombres
+
+# Quitar la cabecera original (primero he mirado que hay en total 72 filas. Se puede automatizar)
+Datos_AT_2014<-Datos_AT_2014[2:72, ]
+
+# Crear la cabecera
+cabeceras<-c("Tipo", "Id_mapa_1", "AMBITO GEOGRAFICO", "provincia", "Etiqueta1", "cod", "INC", "ABS")
+
+# Incorporar la cabecera a los datos
+names(Datos_AT_2014)<-cabeceras
+
+# Asignar un formato numérico a las variables numéricas ¡FALLA!
+Datos_AT_2014$INC<-as.numeric(as.character(Datos_AT_2014$INC))
+Datos_AT_2014$INC<-as.numeric(as.character(Datos_AT_2014$INC))
+
+# Extraer los datos de las PROVINCIAS
+Datos_AT_Provincias_2014<-Datos_AT_2014[Datos_AT_2014$Tipo=="P", ]
+
+
+
+# ====== Comprobar los resultados ===================> OK!
+
+class(Datos_AT_2014)
+## [1] "data.frame"
+
+str(Datos_AT_2014)
+# 'data.frame':  71 obs. of  8 variables:
+# $ Tipo: Factor w/ 3 levels "A","P","Tipo": 1 1 1 1 1 1 1 1 1 1 ...
+# $ Id_mapa_1: Factor w/ 53 levels "01","02","03",..: 10 11 12 13 14 15 16 17 18 ...
+# $ AMBITO GEOGRAFICO: Factor w/ 66 levels "ALBACETE","ALICANTE/ALACANT",..: 25 29 30 44 ...
+# $ provincia: Factor w/ 66 levels "µvila","Albacete",..: 16 28 29 43 45 46 50 ...
+# $ Etiqueta1: Factor w/ 63 levels "albacete","alicante",..: 14 29 30 43 46 47 ...
+# $ cod: Factor w/ 63 levels "alba","alic",..: 16 29 30 43 46 47 51 38 ...
+# $ INC: num  7 27 24 4 19 26 36 22 39 31 ...
+# $ ABS: num  13 48 58 1 19 10 26 21 56 16 ..
+
+summary(Datos_AT_2014)
+
+
+# -----------------------------------------------------
+# Leer los datos en el mapa
+# -----------------------------------------------------
+
+# Asignar el mapa a una variable
+mapa_var=mapa
+
+# Asignar un dato de cc_2014 al mapa
+mapa_var@data=data.frame(Datos_AT_Provincias_2014$ABS)
+
+# ATENCION: Sin forzar a data.frame no funciona
+# ATENCION: cc_2014$ABS cambia a cc_2014.ABS en el mapa
+
+# Dibujamos el mapa
+spplot(mapa_var, "Datos_AT_Provincias_2014.ABS", col.regions=brewer.pal(9,"BuPu"), scales=list(drawn=TRUE))
+spplot(mapa_var, "cc_2014.ABS", col.regions=colorRampPalette(brewer.pal(9,"Blues"))(20), scales=list(drawn=TRUE))
+spplot(mapa_var, "cc_2014.ABS", col.regions=colorRampPalette(brewer.pal(9,"BuPu"))(20), scales=list(drawn=TRUE))
+spplot(mapa_var, "cc_2014.ABS", col.regions=colorRampPalette(brewer.pal(9,"PiYG"))(20), scales=list(drawn=TRUE))
+
+abs2014<-ggplot

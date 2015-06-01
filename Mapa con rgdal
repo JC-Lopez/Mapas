@@ -14,13 +14,13 @@
 setwd("C:/workdir/mapas_rgdal")
 
 # Carga de librerias necesarias
-library(rgdal)
-library(ggplot2)
+library(rgdal)  #S
+library(ggplot2)  #S
 library(rgeos)      # sin cargar
 library(maptools)   # sin cargar
 library(ggmap)
 library(sp)
-library(rgal)       # sin cargar
+library(rgdal)       # sin cargar
 library(RColorBrewer)
 
 # mapa fuente: Provincias_ETRS89_30N
@@ -40,11 +40,6 @@ mapa<-readOGR(dsn="C:/workdir/mapas_rgdal", "Provincias_ETRS89_30N")
 ogrInfo(".", "Provincias_ETRS89_30N")
 # "." es una forma abrebiada de indicar el wd
 
-## OGR data source with driver: ESRI Shapefile 
-## Source: "C:/workdir/mapas_rgdal", layer: "Provincias_ETRS89_30N"
-## with 52 features and 5 fields
-## Feature type: wkbPolygon with 2 dimensions
-
 
 class(mapa)
 ## [1] "SpatialPolygonsDataFrame"
@@ -56,36 +51,58 @@ names(mapa)
 ## [1] "Codigo"    "Texto"     "Texto_Alt" "Cod_CCAA"  "CCAA" 
 
 head(mapa@data, n=2)
-# Muestra 2 registros de las 5 columnas. 
-##    Codigo    Texto Texto_Alt Cod_CCAA                 CCAA
-##  0     01   ÃÂlava     Araba       16            PaÃ­s Vasco
-##  1     02 Albacete  Albacete      08   Castilla - La Mancha
+# Muestra 2 registros de las 5 columnas.
 
-# va a haber problemas con la codificaciÃ³n del texto
-# el nombre mÃ¡s correcto estÃ¡ en la columna "Texto_Alt"
-# "Codigo" tiene un id para cada provincia
+##   Codigo    Texto  Texto_Alt  Cod_CCAA             CCAA
+## 0     01   Ãlava      Araba       16          PaÃ�s Vasco
+
+# Codigo es el id de cada provincia y cod_CCAA de las com. autónomas.
 
 slotNames(mapa)
 ## [1] "data" "polygons" "plotOrder" "bbox" "proj4string"
 
-# se puede extraer la informaciÃ³n de cada slot con, por ejemplo
+# se puede extraer la información de cada slot con, por ejemplo
 mapaData <- mapa@data  (genera una tabla con los valores de las 5 columnas)
 
-# Se graba en un fichero, para facilitar su encaje con el resto de datos
+# Se graba en un fichero, si hace falta, para futuras operaciones
 write.table(mapaData, file = "datosmapa.csv", sep = ";", col.names = NA, qmethod = "double")
 
 summary(mapa)
-# Hay informaciÃ³n sobre las coordenadas max. y min. y el sistema de proyecciÃ³n
-  
+# Hay información sobre las coordenadas max. y min. y el sistema de proyección
+
 plot(mapa)
 # Vemos el mapa
+
+mapa2<-fortify(mapa, region="Codigo")
+# Preparamos el mapa para recibir los datos
+# El argumento "región" determina el objeto que va recibir datos
+
+names(mapa2)
+
+## [1] "long"  "lat"   "order" "hole"  "piece" "group" "id"  
+
+tail(mapa2)
+
+##        long     lat order  hole piece group id
+##  1 497823.7 4784874     1 FALSE     1  01.1 01
+##  2 498456.8 4784220     2 FALSE     1  01.1 01
+##  3 498532.3 4783866     3 FALSE     1  01.1 01
+##  4 498382.2 4783793     4 FALSE     1  01.1 01
+##  5 498945.7 4783509     5 FALSE     1  01.1 01
+##  6 499045.7 4782937     6 FALSE     1  01.1 01
+
+# Ahora tenemos a la vista las coordenadas de cada provincia
+
+summary(mapa2)
+
+
 
 
 # -----------------------------------------------------
 # Carga datos AT 2014
 # -----------------------------------------------------
 
-Datos_AT_2014 <- read.delim("C:/workdir/mapas_rgdal/Datos_AT_2014.txt", header=F)
+Datos_AT_2014 <- read.delim("C:/workdir/mapas_rgdal/Datos_AT_2014.txt", sep=";", header=F)
 
 # El fichero ha sido descargado de la web de la Seg. Social y preparado a mano
 #   - Se han reescrito los nombres de las provincias
@@ -106,19 +123,20 @@ Datos_AT_2014 <- read.delim("C:/workdir/mapas_rgdal/Datos_AT_2014.txt", header=F
 Datos_AT_2014<-Datos_AT_2014[2:72, ]
 
 # Crear la cabecera
-cabeceras<-c("Tipo", "Id_mapa_1", "AMBITO GEOGRAFICO", "provincia", "Etiqueta1", "cod", "INC", "ABS")
+cabeceras<-c("Tipo", "Codigo", "AMBITO GEOGRAFICO", "provincia", "Etiqueta1", "cod", "INC", "ABS")
 
 # Incorporar la cabecera a los datos
 names(Datos_AT_2014)<-cabeceras
 
-# Asignar un formato numérico a las variables numéricas ¡FALLA!
+# Asignar un formato numérico a las variables numéricas
 Datos_AT_2014$INC<-as.numeric(as.character(Datos_AT_2014$INC))
-Datos_AT_2014$INC<-as.numeric(as.character(Datos_AT_2014$INC))
+Datos_AT_2014$ABS<-as.numeric(as.character(Datos_AT_2014$ABS))
 
 # Extraer los datos de las PROVINCIAS
 Datos_AT_Provincias_2014<-Datos_AT_2014[Datos_AT_2014$Tipo=="P", ]
 
-
+# Crear un campo id a partir de Codigo
+Datos_AT_Provincias_2014$id<-Datos_AT_Provincias_2014$Codigo
 
 # ====== Comprobar los resultados ===================> OK!
 
@@ -143,19 +161,47 @@ summary(Datos_AT_2014)
 # Leer los datos en el mapa
 # -----------------------------------------------------
 
-# Asignar el mapa a una variable
-mapa_var=mapa
+# Para ver el mapa
+ggplot(data=mapa2, aes(x=long, y=lat, group=group))+
+  geom_polygon()
 
-# Asignar un dato de cc_2014 al mapa
-mapa_var@data=data.frame(Datos_AT_Provincias_2014$ABS)
+# Unir los datos con el mapa. Atención: el campo común es "id"
+mapa.AT_2014 <- merge(mapa2, Datos_AT_Provincias_2014, by.y="id", all.x=TRUE)
 
-# ATENCION: Sin forzar a data.frame no funciona
-# ATENCION: cc_2014$ABS cambia a cc_2014.ABS en el mapa
 
-# Dibujamos el mapa
-spplot(mapa_var, "Datos_AT_Provincias_2014.ABS", col.regions=brewer.pal(9,"BuPu"), scales=list(drawn=TRUE))
-spplot(mapa_var, "cc_2014.ABS", col.regions=colorRampPalette(brewer.pal(9,"Blues"))(20), scales=list(drawn=TRUE))
-spplot(mapa_var, "cc_2014.ABS", col.regions=colorRampPalette(brewer.pal(9,"BuPu"))(20), scales=list(drawn=TRUE))
-spplot(mapa_var, "cc_2014.ABS", col.regions=colorRampPalette(brewer.pal(9,"PiYG"))(20), scales=list(drawn=TRUE))
+# Ver un mapa básico:
+# =============================================================================
 
-abs2014<-ggplot
+mapa1<-ggplot(mapa.AT_2014, aes(x=long, y=lat, group=group))+
+  geom_polygon(aes(fill= cut(ABS,5)))+
+  # geom_text(data=mapa.AT_2014, aes(label=cod)) FALLA
+  theme_bw() + scale_fill_brewer("% Absentismo por AT (2014)", palette="PuRd")
+
+# cut(ABS, 5) determina el número de niveles en el mapa
+
+
+# El mismo mapa, usando geom_map en ves de geom_polygom:
+# =============================================================================
+
+mapa2<-ggplot(Datos_AT_Provincias_2014)+
+  geom_map(aes(map_id=id, fill=ABS), map=mapa2)+
+  expand_limits(x=mapa2$long, y=mapa2$lat)
+
+
+
+
+# Cosas para mirar
+# =========================================
+
+# simplify: reducir el numero de coordenadas de los poligonos
+# http://stackoverflow.com/questions/20976449/r-simplify-shapefile
+
+# Superponer un mapa del terreno
+# http://www.markhneedham.com/blog/2014/11/17/r-ggmap-overlay-shapefile-with-filled-polygon-of-regions/
+# http://gis.stackexchange.com/questions/71020/mapping-geocoded-addresses-onto-census-shapefiles-in-r
+# https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/OverviewCoordinateReferenceSystems.pdf
+
+
+# Separar canarias de la peninsula
+# Volverlas a juntar, en otra posición más cercana
+

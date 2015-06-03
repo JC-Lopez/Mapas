@@ -1,0 +1,79 @@
+#------------------------------------------------
+#   Introducir un polígono en un mapa
+#------------------------------------------------
+
+# Se trata de representar sobre un mapa un polígono definido a partir de sus coordenadas.
+# Este polígono se puede generar manualmente, como en este caso, o provenir de una fuente
+# externa, como los registros de un GPS, un df ya definido...
+
+# En este caso los pasos son:
+# 1. Definir el polígono, creando un data frame             -> mi_zona
+# 2. Crear un mapa de castelldefels, centrado en la playa   -> mapa_base
+# 3. Combinar con nuestro polígono                          -> mapa_def
+
+
+# Carga de librerias necesarias
+library(ggmap)
+
+
+# 1. Definir el polígono y crear un data frame
+# --------------------------------------------------------------------------------------
+
+column<-c("punto", "lat", "lon")
+a<- c("a", "41.265137", "1.981034") 
+b<- c("b", "41.264551", "1.981389")
+c<- c("c", "41.264833",	"1.982773")
+d<- c("d", "41.265116", "1.98273")
+
+mi_zona<- as.data.frame(rbind(a,b,c,d))
+names(mi_zona)<- c("punto", "lat", "lon")
+mi_zona$lat<-as.numeric(as.character(mi_zona$lat))
+mi_zona$lon<-as.numeric(as.character(mi_zona$lon))
+
+
+
+# 2. Crear un mapa de castelldefels, centrado en la playa
+# --------------------------------------------------------------------------------------
+
+mapa_base<-get_map("41.265254, 1.982241", zoom=17, maptype="satellite")
+mapa_base<-ggmap(mapa_base)
+
+# Las coordenadas se han seleccionado a mano
+
+
+
+# 3. Combinar con nuestro polígono
+# --------------------------------------------------------------------------------------
+
+mapa_def<- mapa_base+
+           geom_polygon(data=mi_zona, aes(x=lon, y=lat), color ="white", 
+                        fill ="orangered4", alpha=0.3, size = .8)+
+           geom_text(aes(x=mean(mi_zona$lon), y=mean(mi_zona$lat, size=8), label="A"))
+
+
+# >>>>>>>>>>>> Notas >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# Poligono:
+# color= Color del borde del polígono 
+# fill = Color de Relleno del polígono
+# alpha = Transparencia del polígono (1= opaco) 
+# size = Grososr de la línea del polígono
+
+# Etiqueta:
+# Primero hay que definir la posición dentro del polígono (media de las coordenadas)
+# Size: tamaño del texto (solo se aprecia si se genera la imagen, no en el visor)
+# Label= Texto 
+
+
+# >>>>>>>>>>>> Problemas >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# Parece que las coordenadas del polígono no se representan correctamente sobre el mapa.
+# Fueron seleccionadas sobre un Google map de la playa, pegando el extremo superior al
+# paseo marítimo, y en el mapa que se genera, el polígono aparece desplazado hacia el sur.
+
+
+# # >>>>>>>>>>>> Proximos pasos >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# Convertir el polígono en un objeto, para facilitar su uso sobre los mapas
+# Modificar el color en función de un valor (añadir datos al polígono)
+# Obtener datos del polígono: superficie, altitud...

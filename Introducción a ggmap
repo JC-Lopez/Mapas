@@ -1,0 +1,138 @@
+# ============================================================================
+#                          Introducción ggmap
+# ============================================================================
+
+# Trabajo en progreso, para ir añadiendo funciones del paquete ggmap
+
+
+library(ggmap)
+
+
+# 1. Lo básico: get_map, ggmap y qmap
+# ============================================================================
+
+# Crear un mapa con get_map
+Barcelona <-get_map(location="Barcelona", zoom=14)
+
+# Para visualizarlo, hace falta la función ggmap
+ggmap(Barcelona)
+
+# También se puede crear el mapa con qmap. En este caso la visualización es directa
+Barcelona_2 <-qmap(location="Barcelona", zoom=14)
+Barcelona_2
+
+# Comparando los dos mapas, son muy similares. El creado con ggmap muestra los valores
+# de latitud y longitud en el margen de la figura, pero la superficie representada es 
+# la misma.
+
+# Se puede decir que:
+
+# =====================================
+#     qmap = get_map + ggmap
+# =====================================
+
+
+# get_map y qmap pueden generar un mapa a partir de varias fuentes de información.
+# Por ejemplo, a partir de unas coordenadas:
+
+Barcelona_3 <-get_map(location=c(lon=2.173404, lat=41.38506), zoom=14)
+ggmap(Barcelona_3)
+
+Barcelona_4 <-qmap(location=c(lon=2.173404, lat=41.38506), zoom=14)
+
+# Incluso directamente de un mombre con significado geográfico
+
+Barcelona_5 <-get_map("Barcelona", zoom=14)
+ggmap(Barcelona_5)
+
+
+# 2. Añadir elementos al mapa
+# ============================================================================
+
+# Es posible representar solo un punto (Barcelona) sobre un sistema de coordenadas
+# long / lat, pero sin mapa de fondo, usando ggplot.
+
+punto <- ggplot()+ geom_point(aes(x=2.173404,y=41.38506 ))
+
+
+# Una vez creados los objetos gráficos, con ggplot o qmqp, no pueden combinarse
+# directamente, como por ejemplo, "Barcelona_4 + punto"
+# La combinación hay que hacerla por capas:
+
+ggmap(Barcelona_3) + 
+  geom_point(aes(x=2.173404,y=41.38506), size=10, colour="red" )
+
+
+
+
+# 3. Añadir título, etiquetas, puntos personalizados...
+# ============================================================================
+
+# Vamos a añadir:
+#  Un título, "Mapa de Barcelona"
+#  Un punto, situado en las coordenadas de "Barcelona", con el borde negro y el centro rojo
+#  Una etiqueta para ese punto, situada encima de su posición
+
+
+library("ggthemes")
+
+ggmap(Barcelona_3) + 
+  ggtitle("Mapa de Barcelona")+
+  geom_point(aes(x=2.173404,y=41.38506), size=13, colour="black" )+
+  geom_point(aes(x=2.173404,y=41.38506), size=10, colour="red" )+
+  geom_text(aes(x=2.173404,y=41.38506, label="Barcelona"),
+            size=15, colour="blue", hjust=0.5, vjust=-1)
+
+
+# Es posible modificar el formato del título
+
+ggmap(Barcelona_3) + 
+  ggtitle("Mapa de Barcelona")+
+  theme(plot.title = element_text(family = "Arial", color="black", face="bold", size=25, vjust=2))
+
+# Es también posible incorporar título y etiquetas de los ejes en una sola línea, aunque
+# luego el formateo requiere de más ordenes
+
+ggmap(Barcelona_3) + 
+ labs(x="Longitud", y="Latitud", title="Mapa de Barcelona")+
+  theme(plot.title=element_text(size=50))+
+  theme(axis.text = element_text(colour = "blue", size=15))+
+  theme(axis.title.y = element_text(size =25, colour="red"))+
+  theme(axis.title.x= element_text(size =25))
+
+
+
+# 4. Añadir un conjunto de puntos de interés y crear un mapa más complejo
+# ============================================================================
+
+# A. Crear un df de puntos turísticos (función geocode)
+
+puntos<-geocode(c("La Pedrera, barcelona", "Estatua de Colon, Barcelona", "Casa Batllo, Barcelona"))
+etiquetas<- c("La Pedrera", "Estatua de Colon", "Casa Batllo")
+puntos<-cbind(puntos, etiquetas)
+
+# B. Representar los puntos sobre un mapa de Barcelona, incluyendo una leyenda dentro del mapa
+
+ggmap(Barcelona_3) + 
+  ggtitle("Barcelona")+
+  theme(plot.title = element_text(color="black", face="bold", size=30, vjust=2))+
+  geom_point(data=puntos, size=15 , aes(x=lon, y=lat, colour="red"))+
+  geom_text(data=puntos, aes(x=lon, y=lat, label=etiquetas), 
+            size=10, colour="blue", hjust=-0.2, vjust=0.2)+
+  theme(legend.position="none")+
+  annotate("text", x = 2.16, y = 41.40, label = "Puntos de Interés", size=15, colour="darkred")
+
+
+
+# Más en: 
+# http://www.sharpsightlabs.com/format-titles-and-axes-in-ggplot2/
+# http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/
+# http://docs.ggplot2.org/0.9.2.1/theme.html
+
+
+# Formato con temas. Ver:
+
+library("ggthemes")
+# theme_stata()
+# theme_economist(
+# etc... en http://cran.r-project.org/web/packages/ggthemes/vignettes/ggthemes.html

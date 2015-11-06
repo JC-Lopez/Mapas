@@ -38,7 +38,7 @@ mapa<-readOGR(dsn="C:/workdir/mapas_rgdal", "Provincias_ETRS89_30N")
 # Examinar los objetos
 
 ogrInfo(".", "Provincias_ETRS89_30N")
-# "." es una forma abrebiada de indicar el wd
+# "." es una forma abreviada de indicar el wd
 
 
 class(mapa)
@@ -61,7 +61,7 @@ head(mapa@data, n=2)
 slotNames(mapa)
 ## [1] "data" "polygons" "plotOrder" "bbox" "proj4string"
 
-# se puede extraer la información de cada slot con, por ejemplo
+# Se puede extraer la información de cada slot con, por ejemplo
 mapaData <- mapa@data  (genera una tabla con los valores de las 5 columnas)
 
 # Se graba en un fichero, si hace falta, para futuras operaciones

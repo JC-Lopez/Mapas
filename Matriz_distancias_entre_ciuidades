@@ -1,9 +1,11 @@
-
+# ===========================================================================
 # Matriz de distancias entre ciudades
+# ===========================================================================
+
 
 # Se dispone de dos listas. Una comntiene, por ejemplo, la dirección de unas oficinas y
 # otra la de los clientes. 
-#¿Qué oficina es ñla más cercana a cada cliente?
+# ¿Qué oficina es la más cercana a cada cliente?
 
 
 

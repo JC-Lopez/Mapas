@@ -1,0 +1,178 @@
+
+# Matriz de distancias entre ciudades
+
+# Se dispone de dos listas. Una comntiene, por ejemplo, la dirección de unas oficinas y
+# otra la de los clientes. 
+#¿Qué oficina es ñla más cercana a cada cliente?
+
+
+
+library(ggmap)
+library(tidyr)
+library(dplyr)
+library(plyr)
+
+
+
+# Crear dos vectores con las coordenadas
+
+http://stackoverflow.com/questions/27557307/how-to-gecode-a-character-matrix-of-addresses-and-output-just-long-and-lat
+http://bioinfoblog.it/2015/02/the-most-useful-r-command-unnest-from-tidyr/
+  
+  
+Clientes<-c("Renteria", "Almagro", "Badajoz")
+Oficinas<-c("Calahorra" , "Castelldefels", "Lepe")
+
+# Datos de los clientes
+lonlat_c<-geocode(Clientes, output=c("latlon","latlona","more","all"))
+# Nota: parece que según la versión, hay que añadir el argumento source="google"
+lonlat_c$cliente<-Clientes
+
+# Datos de las oficinas
+lonlat_o<-geocode(Oficinas, output=c("latlon","latlona","more","all"))
+lonlat_o$oficina<-Oficinas
+
+
+# Calcular la matriz de distancias entre clientes y oficinas
+
+http://franklincenterhq.org/2544/computing-distance-matrix-between-missouri-sex-offenders-and-child-daycare-facilities/
+  
+  library(fields)
+distancias_matriz <- round(rdist.earth(lonlat_c, lonlat_o, miles=FALSE)) 
+rownames(distancias_matriz) <- lonlat_c$cliente 
+colnames(distancias_matriz) <- lonlat_o$oficina 
+distancias_matriz
+
+##            Calahorra Castelldefels Lepe
+##   Renteria       112           390  810
+##   Almagro        408           553  356
+##   Badajoz        569           807  182
+
+# Son distancias en línea recta
+
+# Para conocer las distancias y tiempos reales se puede usar la
+# función mapdist{ggmap}
+
+mapdist("Calahorra, spain", "Renteria, spain", mode = c("driving"))
+
+from <- as.character(Clientes)
+to <- as.character(Oficinas)
+mapdist(from, to, mode = c("driving"))
+
+# pero no las saca todas!!!!
+
+##   from            to      m      km    
+##   1 Renteria     Calahorra 171852 171.852 
+##   2  Almagro Castelldefels 669333 669.333 
+##   3  Badajoz          Lepe 325428 325.428 
+
+
+# ver una solución en:
+# http://stackoverflow.com/questions/24281911/how-to-calculate-distance-with-mulitiple-coordinates-using-mapdist-and-read-ch
+
+
+#===================================================
+# Esto parece que funciona
+#===================================================
+# http://www.research.relund.dk/?p=580
+
+# Juntar clientes y oficinas
+
+datos<-c("Calahorra","Castelldefels","Lepe", "Renteria","Almagro","Badajoz")
+tipo<-c("o", "o","o", "c", "c", "c" )
+todo<-as.data.frame(cbind(datos, tipo))
+class(todo)
+
+
+distanceMat<-matrix(NA, nrow = length(datos), ncol = length(datos))
+for(i in 1:length(datos)) {
+  for(j in 1:length(datos)) {
+    if (i==j) distanceMat[i,j] <- 0   
+    else distanceMat[i,j] <- mapdist(as.character(todo$datos[i]), 
+                                     as.character(todo$datos[j]),
+                                     mode = 'driving', output = 'simple')$km  
+  }
+}
+colnames(distanceMat)<-todo$datos
+rownames(distanceMat)<-todo$datos 
+distanceMat
+
+##                Calahorra Castelldefels     Lepe Renteria Almagro  Badajoz
+##  Calahorra         0.000       411.112  995.158  171.658 529.731  709.447
+##  Castelldefels   411.937         0.000 1100.147  553.482 659.841 1000.957
+##  Lepe            994.690      1099.345    0.000 1039.198 478.125  325.662
+##  Renteria        171.852       553.229 1040.156    0.000 658.808  754.445
+##  Almagro         529.326       669.333  487.416  658.854   0.000  329.326
+##  Badajoz         709.697      1003.904  325.428  754.205 336.461    0.000
+
+# Las distancias son correctas
+
+# Sabemos que las tres primeras son los clientes y las tres últimas
+# las oficinas.
+
+# Extraemos las columnas con los clientes
+distanceMat_2<-distanceMat[ ,4:6]
+
+# Quitamos las filas con los clientes
+distanceMat_2<-distanceMat_2[1:3, ]
+
+# Ya está lista la matriz
+
+##                  Renteria Almagro  Badajoz
+##  Calahorra        171.658 529.731  709.447
+##  Castelldefels    553.482 659.841 1000.957
+##  Lepe            1039.198 478.125  325.66228
+
+# Ahora hay que saber cual es la oficina (fila) más cercana de cada
+# cliente (columna).
+
+# Algunas ideas
+
+# http://gis.stackexchange.com/questions/97310/return-column-number-of-min-value-in-dataframe
+# http://stackoverflow.com/questions/13762364/how-to-find-the-minimum-value-of-a-column-in-r
+
+# http://stackoverflow.com/questions/24831580/return-row-of-data-frame-based-on-value-in-a-column-r
+
+distanceMat_3<-as.data.frame(distanceMat_2)
+distanceMat_3$oficina<-row.names(distanceMat_3)
+
+# La distancia mínima, de la columna 1 (Renteria):
+min(distanceMat_3[,1])
+## [1] 171.852
+
+# El nombre de la oficina más cercana al cliebnte de la columna 1 (2 formas):
+distanceMat_3[which.min(distanceMat_3$Renteria), 4]
+distanceMat_3[which.min(distanceMat_3[, 1]), 4]
+## [1] "Calahorra"
+
+
+# Tratando de hacer un loop
+
+# Con las oficinas ----> ESto da la lista de clientes!!!!
+length(Clientes)
+Oficina<-matrix(nrow=length(Clientes), ncol=1)
+for(i in 1:length(Clientes))
+  Oficina[i,]<-distanceMat_3[which.min(distanceMat_3[,i]), 4]
+##      [,1]      
+## [1,] "Calahorra"
+## [2,] "Lepe"     
+## [3,] "Lepe"
+
+# Lo mismo con la distancia
+Distancia<-matrix(nrow=length(Clientes), ncol=1)
+for(i in 1:length(Clientes))
+  Distancia[i,]<-min(distanceMat_3[,i])
+##         [,1]
+## [1,] 171.658
+## [2,] 478.125
+## [3,] 325.662
+
+# Juntamos todo
+TablaFinal<-cbind(Clientes, Oficina, Distancia)
+TablaFinal<-as.data.frame(TablaFinal)
+colnames(TablaFinal)<-c("Clientes", "Oficina", "Distancia")
+TablaFinal
+##    Clientes   Oficina Distancia
+##  1 Renteria Calahorra   171.658
+##  2  Almagro      Lepe   478.125
+##  3  Badajoz      Lepe   325.662
